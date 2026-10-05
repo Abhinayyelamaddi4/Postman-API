@@ -1,0 +1,234 @@
+{
+  "info": {
+    "_postman_id": "740501d7-586c-48ac-ac2f-cafba72c31bf",
+    "name": "Ecommerce Project",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58719772",
+    "_collection_link": "https://go.postman.co/collection/58719772-740501d7-586c-48ac-ac2f-cafba72c31bf?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "EnvironmentVariable",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "let jsonData = pm.response.json();\r\npm.environment.set(\"token\",jsonData.accessToken);\r\nconsole.log(pm.environment.get(\"token\")); // token is added to environment variable"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"username\": \"emilys\",\r\n    \"password\": \"emilyspass\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{Base_URL}}/auth/login",
+          "host": [
+            "{{Base_URL}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AuthenticationToken",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{Base_URL}}/auth/me",
+          "host": [
+            "{{Base_URL}}"
+          ],
+          "path": [
+            "auth",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "HeaderValue",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "    pm.test(\"Status code is 200\", function () {\r\n        pm.response.to.have.status(200);\r\n    });\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{Base_URL}}/auth/me",
+          "host": [
+            "{{Base_URL}}"
+          ],
+          "path": [
+            "auth",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GetProducts",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\nlet jsonData = pm.response.json();\n    pm.environment.set(\"product_id\",jsonData.products[0].id);\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{Base_URL}}/products",
+          "host": [
+            "{{Base_URL}}"
+          ],
+          "path": [
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ProductSelected",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status is 200\",function(){\r\n    pm.response.to.have.status(200);\r\n})"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{Base_URL}}/products/{{product_id}}",
+          "host": [
+            "{{Base_URL}}"
+          ],
+          "path": [
+            "products",
+            "{{product_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AddtoCart",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status is 201\",function(){\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\nlet jsonData = pm.response.json();\r\n\r\npm.test(\"carts has the products\",function(){\r\n    pm.expect(jsonData.products.length).to.be.above(0);\r\n})\r\n\r\npm.environment.set(\"cart_id\",jsonData.id)"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\": 1,\r\n    \"products\": [\r\n        {\r\n            \"id\": {{product_id}},\r\n            \"quantity\": 4\r\n        }\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{Base_URL}}/carts/add",
+          "host": [
+            "{{Base_URL}}"
+          ],
+          "path": [
+            "carts",
+            "add"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GetCartDetails",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status is 200\",function(){\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nlet jsonData = pm.response.json();\r\n\r\npm.test(\"total cart value \",function(){\r\n    pm.expect(jsonData.total).to.equal(208);\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{Base_URL}}/carts",
+          "host": [
+            "{{Base_URL}}"
+          ],
+          "path": [
+            "carts"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
